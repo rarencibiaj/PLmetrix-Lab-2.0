@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pandas
+numpy
+scipy
+statsmodels
+python-docx
+pypdf
+openpyxl
+python-multipart
+pytest
