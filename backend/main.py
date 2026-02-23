@@ -12,7 +12,7 @@ app.add_middleware(
     CORSMiddleware,
     # Allow all origins for production and localhost for development
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
