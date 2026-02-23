@@ -1,0 +1,20 @@
+# .dockerignore
+.git
+.next
+node_modules
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.db
+.DS_Store
+backend/venv
+frontend/node_modules
+frontend/.next
+frontend/out
+frontend/build
+.env
+.env.local
+.vscode
+.idea
