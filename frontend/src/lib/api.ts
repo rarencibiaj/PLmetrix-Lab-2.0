@@ -58,7 +58,7 @@ export interface PriceResult {
 export const analyzeLotka = async (file: File): Promise<LotkaResult> => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await axios.post(`${API_BASE_URL}/api/analyze/lotka`, formData, {
+    const response = await axios.post(`${API_BASE_URL}/analyze/lotka`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
@@ -67,7 +67,7 @@ export const analyzeLotka = async (file: File): Promise<LotkaResult> => {
 export const analyzeBradford = async (file: File): Promise<BradfordResult> => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await axios.post(`${API_BASE_URL}/api/analyze/bradford`, formData, {
+    const response = await axios.post(`${API_BASE_URL}/analyze/bradford`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
@@ -76,7 +76,7 @@ export const analyzeBradford = async (file: File): Promise<BradfordResult> => {
 export const analyzeZipf = async (file: File): Promise<ZipfResult> => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await axios.post(`${API_BASE_URL}/api/analyze/zipf`, formData, {
+    const response = await axios.post(`${API_BASE_URL}/analyze/zipf`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
@@ -85,7 +85,7 @@ export const analyzeZipf = async (file: File): Promise<ZipfResult> => {
 export const analyzePrice = async (file: File): Promise<PriceResult> => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await axios.post(`${API_BASE_URL}/api/analyze/price`, formData, {
+    const response = await axios.post(`${API_BASE_URL}/analyze/price`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
@@ -119,7 +119,7 @@ export interface GrowthResult {
 export const analyzeGrowth = async (file: File): Promise<GrowthResult> => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await axios.post(`${API_BASE_URL}/api/analyze/growth`, formData, {
+    const response = await axios.post(`${API_BASE_URL}/analyze/growth`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
