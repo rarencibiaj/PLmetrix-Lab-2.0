@@ -22,7 +22,7 @@ FROM node:20-slim
 WORKDIR /app
 
 # Copy necessary files from builder
-COPY --from=builder /app/next.config.mjs ./
+COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
