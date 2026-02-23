@@ -4,7 +4,7 @@ services:
       context: ./backend
     container_name: plmetrix-backend
     ports:
-      - "8001:8000"
+      - "8003:8000"
     environment:
       - PORT=8000
     restart: always
