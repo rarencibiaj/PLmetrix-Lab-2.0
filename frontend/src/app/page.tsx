@@ -4,7 +4,7 @@ import React, { useState } from "react";
 
 import FileUpload from "../components/FileUpload";
 import ResultsView from "../components/ResultsView";
-import { BookOpen, BarChart2, FileText, Activity, ArrowLeft, ChevronRight, Info, X, Users, Code, Layout, Database, Server, Monitor, Globe, CheckCircle, Upload, Download, BarChart } from "lucide-react";
+import { BookOpen, BarChart2, FileText, Activity, ArrowLeft, ChevronRight, Info, X, Users, Code, Layout, Database, Server, Monitor, Globe, CheckCircle, Upload, Download, BarChart, TrendingUp } from "lucide-react";
 
 // ── Translations ──────────────────────────────────────────────────────────────
 const translations = {
@@ -37,6 +37,11 @@ const translations = {
       name: "Índice de Price",
       description: "Recencia y obsolescencia de referencias.",
       longDescription: "Mide la proporción de referencias recientes en un trabajo, indicando la velocidad de crecimiento del conocimiento y la obsolescencia en un campo.",
+    },
+    growth: {
+      name: "Crecimiento Exponencial",
+      description: "Ley del Crecimiento Exponencial de la Literatura Científica.",
+      longDescription: "Analiza el comportamiento anual de la producción científica y determina si se cumple la Ley de Price: N = N₀ × e^(b×t). Identifica las fases precientífica, exponencial y de estabilización.",
     },
     // About modal
     aboutTitle: "Acerca de PLmetrix Lab",
@@ -96,6 +101,10 @@ const translations = {
     manualPriceFormats: "Acepta archivos .txt, .docx o .pdf con referencias bibliográficas.",
     manualPriceData: "Cargue un documento que contenga referencias bibliográficas con años. El sistema detectará automáticamente las fechas y calculará el Índice de Price.",
     manualPriceResults: "Resultados: Índice de Price (porcentaje de refs. recientes ≤ 5 años), total de referencias, interpretación automática del nivel de obsolescencia, y histograma de distribución temporal.",
+    manualGrowthTitle: "Módulo Crecimiento Exponencial — Ley de Price",
+    manualGrowthFormats: "Acepta archivos .xlsx, .csv o .txt (exportación Web of Science).",
+    manualGrowthData: "El archivo debe contener al menos dos columnas: año de publicación (Publication Years / Final Publication Year) y conteo de registros (Record Count). El sistema detecta automáticamente los nombres de columnas.",
+    manualGrowthResults: "Resultados: parámetros del modelo exponencial (N₀, b, tiempo de duplicación), R² de los modelos exponencial y logístico, clasificación en las tres fases de Price (precientífica, exponencial, estabilización), fase del campo (emergencia o madurez estructural), año de inflexión, y gráfico comparativo de datos reales vs. modelos teóricos.",
     manualPdfExport: "Exportación a PDF",
     manualPdfDesc: "Todos los módulos incluyen un botón \"Descargar PDF\" que genera un informe profesional con el encabezado PLmetrix Lab Report, los resultados estadísticos, las tablas de datos y los gráficos del análisis.",
   },
@@ -128,6 +137,11 @@ const translations = {
       name: "Price Index",
       description: "Reference recency and obsolescence.",
       longDescription: "Measures the proportion of recent references in a work, indicating the speed of knowledge growth and obsolescence in a field.",
+    },
+    growth: {
+      name: "Exponential Growth",
+      description: "Law of Exponential Growth of Scientific Literature.",
+      longDescription: "Analyzes the annual behavior of scientific production and determines whether Price's Law holds: N = N₀ × e^(b×t). Identifies pre-scientific, exponential, and stabilization phases.",
     },
     // About modal
     aboutTitle: "About PLmetrix Lab",
@@ -187,6 +201,10 @@ const translations = {
     manualPriceFormats: "Accepts .txt, .docx, or .pdf files with bibliographic references.",
     manualPriceData: "Upload a document containing bibliographic references with years. The system will automatically detect dates and compute the Price Index.",
     manualPriceResults: "Results: Price Index (percentage of recent refs. ≤ 5 years), total references, automatic obsolescence interpretation, and temporal distribution histogram.",
+    manualGrowthTitle: "Exponential Growth Module — Price's Law",
+    manualGrowthFormats: "Accepts .xlsx, .csv, or .txt (Web of Science export) files.",
+    manualGrowthData: "The file must contain at least two columns: publication year (Publication Years / Final Publication Year) and record count (Record Count). The system automatically detects column names.",
+    manualGrowthResults: "Results: exponential model parameters (N₀, b, doubling time), R² for exponential and logistic models, classification into Price's three phases (pre-scientific, exponential, stabilization), field phase (emergence or structural maturity), inflection year, and comparative chart of real data vs. theoretical models.",
     manualPdfExport: "PDF Export",
     manualPdfDesc: "All modules include a \"Download PDF\" button that generates a professional report with the PLmetrix Lab Report header, statistical results, data tables, and analysis charts.",
   },
@@ -195,7 +213,7 @@ const translations = {
 type Lang = "es" | "en";
 
 export default function Home() {
-  const [activeModule, setActiveModule] = useState<"lotka" | "bradford" | "zipf" | "price" | null>(null);
+  const [activeModule, setActiveModule] = useState<"lotka" | "bradford" | "zipf" | "price" | "growth" | null>(null);
   const [resultData, setResultData] = useState<any>(null);
   const [error, setError] = useState<string>("");
   const [showAbout, setShowAbout] = useState(false);
@@ -204,7 +222,7 @@ export default function Home() {
 
   const t = translations[lang];
 
-  const handleModuleChange = (module: "lotka" | "bradford" | "zipf" | "price") => {
+  const handleModuleChange = (module: "lotka" | "bradford" | "zipf" | "price" | "growth") => {
     setActiveModule(module);
     setResultData(null);
     setError("");
@@ -221,33 +239,37 @@ export default function Home() {
     setError("");
   };
 
-  const moduleIds = ["lotka", "bradford", "zipf", "price"] as const;
+  const moduleIds = ["lotka", "bradford", "zipf", "price", "growth"] as const;
   const moduleIcons = {
     lotka: <BookOpen size={20} />,
     bradford: <BarChart2 size={20} />,
     zipf: <FileText size={20} />,
     price: <Activity size={20} />,
+    growth: <TrendingUp size={20} />,
   };
   const moduleFullNames = {
     lotka: "Alfred J. Lotka",
     bradford: "Samuel C. Bradford",
     zipf: "George K. Zipf",
     price: "Derek J. de Solla Price",
+    growth: "Derek J. de Solla Price",
   };
-  const moduleYears = { lotka: "1926", bradford: "1934", zipf: "1949", price: "1963" };
+  const moduleYears = { lotka: "1926", bradford: "1934", zipf: "1949", price: "1963", growth: "1963" };
   const moduleImages = {
     lotka: "/images/lotka.jpg",
     bradford: "/images/bradford.jpg",
     zipf: "/images/zipf.jpg",
     price: "/images/price.jpg",
+    growth: "/images/price.jpg",
   };
-  const moduleColors = { lotka: "emerald", bradford: "blue", zipf: "violet", price: "amber" };
+  const moduleColors = { lotka: "emerald", bradford: "blue", zipf: "violet", price: "amber", growth: "rose" };
 
   const colorClasses: Record<string, { bg: string; border: string; text: string; ring: string; badge: string; hover: string }> = {
     emerald: { bg: "bg-emerald-50", border: "border-emerald-500", text: "text-emerald-700", ring: "ring-emerald-500", badge: "bg-emerald-100 text-emerald-700", hover: "hover:border-emerald-400 hover:shadow-lg" },
     blue: { bg: "bg-blue-50", border: "border-blue-500", text: "text-blue-700", ring: "ring-blue-500", badge: "bg-blue-100 text-blue-700", hover: "hover:border-blue-400 hover:shadow-lg" },
     violet: { bg: "bg-violet-50", border: "border-violet-500", text: "text-violet-700", ring: "ring-violet-500", badge: "bg-violet-100 text-violet-700", hover: "hover:border-violet-400 hover:shadow-lg" },
     amber: { bg: "bg-amber-50", border: "border-amber-500", text: "text-amber-700", ring: "ring-amber-500", badge: "bg-amber-100 text-amber-700", hover: "hover:border-amber-400 hover:shadow-lg" },
+    rose: { bg: "bg-rose-50", border: "border-rose-500", text: "text-rose-700", ring: "ring-rose-500", badge: "bg-rose-100 text-rose-700", hover: "hover:border-rose-400 hover:shadow-lg" },
   };
 
   const activeModuleData = activeModule ? {
@@ -312,7 +334,7 @@ export default function Home() {
               <p className="text-slate-500 text-lg">{t.modulesSubtitle}</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
               {moduleIds.map((id) => {
                 const colors = colorClasses[moduleColors[id]];
                 const mod = t[id];
@@ -627,6 +649,10 @@ export default function Home() {
                         <p className="font-semibold text-amber-700">price.py — {t.price.name} (1963)</p>
                         <p>{t.priceDesc}</p>
                       </div>
+                      <div>
+                        <p className="font-semibold text-rose-700">growth.py — {t.growth.name} (1963)</p>
+                        <p>{lang === 'es' ? 'Analiza el crecimiento exponencial de la producción científica según la Ley de Price. Ajusta modelos exponencial y logístico, identifica las tres fases clásicas y calcula el tiempo de duplicación y año de inflexión.' : 'Analyzes exponential growth of scientific production according to Price\'s Law. Fits exponential and logistic models, identifies the three classical phases, and computes doubling time and inflection year.'}</p>
+                      </div>
                     </div>
                   </div>
 
@@ -779,6 +805,19 @@ export default function Home() {
                       <p><strong className="text-amber-700">{t.manualFormats}:</strong> {t.manualPriceFormats}</p>
                       <p>{t.manualPriceData}</p>
                       <p className="bg-amber-50 p-3 rounded-lg border border-amber-100"><strong>📊 </strong>{t.manualPriceResults}</p>
+                    </div>
+                  </div>
+
+                  {/* Growth */}
+                  <div className="border border-rose-200 rounded-xl overflow-hidden">
+                    <div className="bg-rose-50 px-5 py-3 border-b border-rose-200 flex items-center gap-2">
+                      <TrendingUp size={18} className="text-rose-600" />
+                      <h4 className="font-bold text-rose-800">{t.manualGrowthTitle}</h4>
+                    </div>
+                    <div className="px-5 py-4 text-sm text-slate-700 space-y-2">
+                      <p><strong className="text-rose-700">{t.manualFormats}:</strong> {t.manualGrowthFormats}</p>
+                      <p>{t.manualGrowthData}</p>
+                      <p className="bg-rose-50 p-3 rounded-lg border border-rose-100"><strong>📊 </strong>{t.manualGrowthResults}</p>
                     </div>
                   </div>
                 </div>

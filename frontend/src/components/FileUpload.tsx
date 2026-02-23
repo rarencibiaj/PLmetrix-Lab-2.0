@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import { Upload, FileText, FileSpreadsheet, AlertCircle } from "lucide-react";
-import { analyzeLotka, analyzeBradford, analyzeZipf, analyzePrice } from "../lib/api";
+import { analyzeLotka, analyzeBradford, analyzeZipf, analyzePrice, analyzeGrowth } from "../lib/api";
 
 interface FileUploadProps {
-    module: "lotka" | "bradford" | "zipf" | "price";
+    module: "lotka" | "bradford" | "zipf" | "price" | "growth";
     onResult: (data: any) => void;
     onError: (error: string) => void;
 }
@@ -31,6 +31,9 @@ const FileUpload: React.FC<FileUploadProps> = ({ module, onResult, onError }) =>
                     break;
                 case "price":
                     result = await analyzePrice(file);
+                    break;
+                case "growth":
+                    result = await analyzeGrowth(file);
                     break;
             }
             onResult(result);
@@ -86,7 +89,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ module, onResult, onError }) =>
                 type="file"
                 className="hidden"
                 onChange={handleChange}
-                accept={module === "zipf" || module === "price" ? ".txt,.docx,.pdf" : (module === "lotka" || module === "bradford") ? ".xlsx,.csv,.txt" : ".xlsx,.csv"}
+                accept={module === "zipf" || module === "price" ? ".txt,.docx,.pdf" : (module === "lotka" || module === "bradford" || module === "growth") ? ".xlsx,.csv,.txt" : ".xlsx,.csv"}
             />
 
             <div className="flex flex-col items-center justify-center space-y-4">
@@ -100,7 +103,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ module, onResult, onError }) =>
                     <p className="text-sm text-zinc-500 mt-1">
                         {module === "zipf" || module === "price"
                             ? "Supported: .docx, .pdf, .txt"
-                            : (module === "lotka" || module === "bradford") ? "Supported: .xlsx, .csv, .txt (Web of Science)"
+                            : (module === "lotka" || module === "bradford" || module === "growth") ? "Supported: .xlsx, .csv, .txt (Web of Science)"
                                 : "Supported: .xlsx, .csv"}
                     </p>
                 </div>

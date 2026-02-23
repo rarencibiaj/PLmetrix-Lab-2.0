@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { LotkaResult, BradfordResult, ZipfResult, PriceResult } from "../lib/api";
+import { LotkaResult, BradfordResult, ZipfResult, PriceResult, GrowthResult } from "../lib/api";
 import dynamic from "next/dynamic";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -10,8 +10,8 @@ import { Download } from "lucide-react";
 const ChartComponent = dynamic(() => import("./ChartComponent"), { ssr: false });
 
 interface ResultsViewProps {
-    type: "lotka" | "bradford" | "zipf" | "price";
-    data: LotkaResult | BradfordResult | ZipfResult | PriceResult | null;
+    type: "lotka" | "bradford" | "zipf" | "price" | "growth";
+    data: LotkaResult | BradfordResult | ZipfResult | PriceResult | GrowthResult | null;
 }
 
 const ResultsView: React.FC<ResultsViewProps> = ({ type, data }) => {
@@ -55,6 +55,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ type, data }) => {
             case "bradford": return renderBradford(data as BradfordResult);
             case "zipf": return renderZipf(data as ZipfResult);
             case "price": return renderPrice(data as PriceResult);
+            case "growth": return renderGrowth(data as GrowthResult);
             default: return null;
         }
     };
@@ -230,6 +231,115 @@ const ResultsView: React.FC<ResultsViewProps> = ({ type, data }) => {
                     }}
                 />
             </div>
+        </div>
+    );
+
+    const renderGrowth = (result: GrowthResult) => (
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Statistics */}
+                <div className="bg-white p-4 rounded-lg shadow border border-zinc-200">
+                    <h3 className="text-lg font-semibold mb-3">Exponential Growth Statistics</h3>
+                    <div className="text-center py-3 mb-3 bg-gradient-to-r from-rose-50 to-amber-50 rounded-lg border border-rose-200">
+                        <span className={`text-2xl font-bold ${result.field_phase === 'structural_maturity' ? 'text-amber-600' : 'text-rose-600'}`}>
+                            {result.field_phase === 'structural_maturity' ? '🔬 Structural Maturity' : '🚀 Emergence'}
+                        </span>
+                    </div>
+                    <ul className="space-y-2 text-sm">
+                        <li><strong>N₀ (Initial magnitude):</strong> {result.N0.toFixed(4)}</li>
+                        <li><strong>b (Growth constant):</strong> {result.b_constant.toFixed(6)}</li>
+                        {result.doubling_time && (
+                            <li><strong>Doubling time:</strong> {result.doubling_time.toFixed(1)} years</li>
+                        )}
+                        <li><strong>R² (Exponential model):</strong> {result.r_squared_exp.toFixed(4)}</li>
+                        <li><strong>R² (Logistic model):</strong> {result.r_squared_logistic.toFixed(4)}</li>
+                        <li><strong>K (Carrying capacity):</strong> {result.K_capacity.toFixed(2)}</li>
+                        {result.inflection_year && (
+                            <li className="font-bold text-amber-700">Inflection year: {result.inflection_year}</li>
+                        )}
+                        <li><strong>Time span:</strong> {result.total_years} years</li>
+                        <li><strong>Total records:</strong> {result.total_records.toLocaleString()}</li>
+                    </ul>
+                </div>
+
+                {/* Phases Panel */}
+                <div className="bg-white p-4 rounded-lg shadow border border-zinc-200">
+                    <h3 className="text-lg font-semibold mb-3">Price&apos;s Three Phases</h3>
+                    <div className="space-y-3">
+                        {result.phases.pre_scientific && (
+                            <div className="p-3 bg-slate-50 rounded-lg border-l-4 border-slate-400">
+                                <p className="font-semibold text-slate-700">1. Pre-scientific Phase</p>
+                                <p className="text-sm text-slate-600">
+                                    {result.phases.pre_scientific.start} — {result.phases.pre_scientific.end}
+                                </p>
+                                <p className="text-xs text-slate-500 mt-1">Sparse, low-volume production before sustained growth.</p>
+                            </div>
+                        )}
+                        {result.phases.exponential && (
+                            <div className="p-3 bg-rose-50 rounded-lg border-l-4 border-rose-500">
+                                <p className="font-semibold text-rose-700">2. Exponential Phase</p>
+                                <p className="text-sm text-rose-600">
+                                    {result.phases.exponential.start} — {result.phases.exponential.end}
+                                </p>
+                                <p className="text-xs text-rose-500 mt-1">Main growth period following N = N₀ × e^(b×t).</p>
+                            </div>
+                        )}
+                        {result.phases.stabilization ? (
+                            <div className="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+                                <p className="font-semibold text-amber-700">3. Stabilization Phase</p>
+                                <p className="text-sm text-amber-600">
+                                    {result.phases.stabilization.start} — {result.phases.stabilization.end}
+                                </p>
+                                <p className="text-xs text-amber-500 mt-1">Logistic deceleration begins. The field is entering structural maturity.</p>
+                            </div>
+                        ) : (
+                            <div className="p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
+                                <p className="font-semibold text-green-700">3. Stabilization Phase</p>
+                                <p className="text-sm text-green-600">Not yet observed</p>
+                                <p className="text-xs text-green-500 mt-1">The field remains in the emergence/exponential stage.</p>
+                            </div>
+                        )}
+                    </div>
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-700">
+                        <strong>Formula:</strong> N = N₀ × e<sup>(b×t)</sup> where N₀ = {result.N0.toFixed(2)}, b = {result.b_constant.toFixed(4)}
+                    </div>
+                </div>
+            </div>
+
+            {/* Chart */}
+            <ChartComponent
+                title="Scientific Production: Observed vs Models"
+                data={[
+                    {
+                        x: result.plot_data.years,
+                        y: result.plot_data.observed,
+                        type: "scatter",
+                        mode: "markers",
+                        name: "Observed",
+                        marker: { color: "#2563eb", size: 7 },
+                    },
+                    {
+                        x: result.plot_data.years,
+                        y: result.plot_data.fitted_exponential,
+                        type: "scatter",
+                        mode: "lines",
+                        name: "Exponential model",
+                        line: { color: "#dc2626", width: 2, dash: "dot" },
+                    },
+                    {
+                        x: result.plot_data.years,
+                        y: result.plot_data.fitted_logistic,
+                        type: "scatter",
+                        mode: "lines",
+                        name: "Logistic model",
+                        line: { color: "#d97706", width: 2 },
+                    },
+                ]}
+                layout={{
+                    xaxis: { title: { text: "Year", font: { size: 14 }, standoff: 20 } },
+                    yaxis: { title: { text: "Number of Publications", font: { size: 14 }, standoff: 20 } },
+                }}
+            />
         </div>
     );
 

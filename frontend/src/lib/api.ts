@@ -26,6 +26,7 @@ export interface BradfordResult {
         rank: number[];
         cumulative_articles: number[];
         log_rank: number[];
+        zone_labels?: number[];
     };
 }
 
@@ -85,6 +86,40 @@ export const analyzePrice = async (file: File): Promise<PriceResult> => {
     const formData = new FormData();
     formData.append('file', file);
     const response = await axios.post(`${API_BASE_URL}/api/analyze/price`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+};
+
+export interface GrowthResult {
+    N0: number;
+    b_constant: number;
+    doubling_time: number | null;
+    r_squared_exp: number;
+    r_squared_logistic: number;
+    K_capacity: number;
+    logistic_r: number;
+    field_phase: string;
+    inflection_year: number | null;
+    phases: {
+        pre_scientific: { start: number; end: number } | null;
+        exponential: { start: number; end: number } | null;
+        stabilization: { start: number; end: number } | null;
+    };
+    total_years: number;
+    total_records: number;
+    plot_data: {
+        years: number[];
+        observed: number[];
+        fitted_exponential: number[];
+        fitted_logistic: number[];
+    };
+}
+
+export const analyzeGrowth = async (file: File): Promise<GrowthResult> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await axios.post(`${API_BASE_URL}/api/analyze/growth`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;

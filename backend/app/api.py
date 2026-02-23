@@ -7,6 +7,7 @@ from .lotka import calculate_lotka
 from .bradford import calculate_bradford
 from .zipf import calculate_zipf
 from .price import calculate_price_index
+from .growth import calculate_growth
 from .utils import read_file_content
 
 logger = logging.getLogger(__name__)
@@ -263,4 +264,82 @@ async def analyze_price(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Price unexpected error: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
+
+def detect_growth_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Detect and rename columns for Growth analysis.
+    Expects: year column + record count column (WoS export format).
+    """
+    df = normalize_columns(df)
+
+    if 'year' in df.columns and 'record_count' in df.columns:
+        return df
+
+    year_aliases = [
+        'publication_years', 'publication_year', 'publication years',
+        'final_publication_year', 'final publication year',
+        'year', 'año', 'anio', 'years', 'años',
+    ]
+    count_aliases = [
+        'record_count', 'record count', 'records', 'count',
+        'frequency', 'frecuencia', 'articles', 'articulos',
+        'publications', 'publicaciones', 'documents', 'documentos',
+    ]
+
+    year_col = None
+    count_col = None
+
+    for alias in year_aliases:
+        if alias in df.columns:
+            year_col = alias
+            break
+
+    for alias in count_aliases:
+        if alias in df.columns:
+            count_col = alias
+            break
+
+    # Fallback: first column with year-like values, first numeric column
+    if year_col is None:
+        for col in df.columns:
+            vals = pd.to_numeric(df[col], errors='coerce').dropna()
+            if len(vals) > 0 and vals.min() >= 1800 and vals.max() <= 2100:
+                year_col = col
+                break
+
+    if count_col is None:
+        num_cols = df.select_dtypes(include='number').columns.tolist()
+        remaining = [c for c in num_cols if c != year_col]
+        if remaining:
+            count_col = remaining[0]
+
+    if year_col is None or count_col is None:
+        raise ValueError(
+            f"Cannot detect columns. Found: {list(df.columns)}. "
+            f"Expected year + record count columns (e.g., 'Publication Years' and 'Record Count')."
+        )
+
+    df = df.rename(columns={year_col: 'year', count_col: 'record_count'})
+    return df
+
+
+@router.post("/analyze/growth")
+async def analyze_growth(file: UploadFile = File(...)):
+    if not file.filename.endswith(('.xlsx', '.csv', '.txt')):
+        raise HTTPException(status_code=400, detail="Invalid file format. Please upload .xlsx, .csv, or .txt")
+
+    try:
+        content = await file.read()
+        df = read_dataframe(content, file.filename, drop_pct_columns=True)
+        logger.info(f"Growth upload: columns={list(df.columns)}, shape={df.shape}")
+        df = detect_growth_columns(df)
+        result = calculate_growth(df)
+        return result
+    except ValueError as e:
+        logger.warning(f"Growth ValueError: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Growth unexpected error: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
