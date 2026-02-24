@@ -6,6 +6,9 @@ import FileUpload from "../components/FileUpload";
 import ResultsView from "../components/ResultsView";
 import { BookOpen, BarChart2, FileText, Activity, ArrowLeft, ChevronRight, Info, X, Users, Code, Layout, Database, Server, Monitor, Globe, CheckCircle, Upload, Download, BarChart, TrendingUp } from "lucide-react";
 
+// Prefix for public static assets — required when Next.js basePath is set
+const assetPrefix = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 // ── Translations ──────────────────────────────────────────────────────────────
 const translations = {
   es: {
@@ -256,11 +259,11 @@ export default function Home() {
   };
   const moduleYears = { lotka: "1926", bradford: "1934", zipf: "1949", price: "1963", growth: "1963" };
   const moduleImages = {
-    lotka: "/images/lotka.jpg",
-    bradford: "/images/bradford.jpg",
-    zipf: "/images/zipf.jpg",
-    price: "/images/price.jpg",
-    growth: "/images/price.jpg",
+    lotka: `${assetPrefix}/images/lotka.jpg`,
+    bradford: `${assetPrefix}/images/bradford.jpg`,
+    zipf: `${assetPrefix}/images/zipf.jpg`,
+    price: `${assetPrefix}/images/price.jpg`,
+    growth: `${assetPrefix}/images/price.jpg`,
   };
   const moduleColors = { lotka: "emerald", bradford: "blue", zipf: "violet", price: "amber", growth: "rose" };
 
@@ -287,9 +290,9 @@ export default function Home() {
       <header className="bg-slate-900 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <img src="/images/logo_fciencias.png" alt="Facultad de Ciencias UNAM" className="h-10 bg-white rounded px-1" />
-            <img src="/images/logo_ldnl.png" alt="Laboratorio de Dinámica No Lineal" className="h-10 bg-white rounded px-1" />
-            <img src="/images/logo_extra.png" alt="Logo" className="h-10" />
+            <img src={`${assetPrefix}/images/logo_fciencias.png`} alt="Facultad de Ciencias UNAM" className="h-10 bg-white rounded px-1" />
+            <img src={`${assetPrefix}/images/logo_ldnl.png`} alt="Laboratorio de Dinámica No Lineal" className="h-10 bg-white rounded px-1" />
+            <img src={`${assetPrefix}/images/logo_extra.png`} alt="Logo" className="h-10" />
             <button onClick={handleBack} className="flex items-center">
               <h1 className="text-xl font-bold tracking-tight">PLmetrix Lab <span className="text-slate-400 font-normal text-sm ml-2">{t.subtitle}</span></h1>
             </button>
