@@ -13,13 +13,13 @@ services:
     build:
       context: ./frontend
       args:
-        - NEXT_PUBLIC_API_URL=http://dinamica1.fciencias.unam.mx/plmetrix-api
+        - NEXT_PUBLIC_API_URL=https://dinamica1.fciencias.unam.mx/plmetrix-api
         - NEXT_PUBLIC_BASE_PATH=/plmetrix
     container_name: plmetrix-frontend
     ports:
       - "5006:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://dinamica1.fciencias.unam.mx/plmetrix-api
+      - NEXT_PUBLIC_API_URL=https://dinamica1.fciencias.unam.mx/plmetrix-api
       - NEXT_PUBLIC_BASE_PATH=/plmetrix
     depends_on:
       - backend
